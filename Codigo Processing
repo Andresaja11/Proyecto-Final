@@ -1,0 +1,65 @@
+import processing.serial.*;
+
+Serial myPort;  // Crear objeto Serial
+boolean[] ledStates = new boolean[11]; // Array para almacenar estados de los LEDs
+
+void setup() {
+  size(1000, 400); // Ajustar tamaño de la ventana
+  println(Serial.list()); // Imprime la lista de puertos disponibles
+  String portName = Serial.list()[0]; // Ajustar según tu puerto
+  myPort = new Serial(this, portName, 9600);
+}
+
+void draw() {
+  background(255);
+
+  int xOffset = 100;
+  int yOffsetTop = 100; // Offset para los círculos de arriba
+  int yOffsetBottom = 300; // Offset para los círculos de abajo
+
+ // Dibujar los círculos para los LEDs
+  for (int i = 0; i < 10; i++) {
+    int x = xOffset + i * 80; // Espaciar los círculos
+    int y;
+    if (i % 2 == 0) {
+      y = yOffsetTop; // Posicionar los círculos pares arriba
+    } else {
+      y = yOffsetBottom; // Posicionar los círculos impares abajo
+    }
+
+    // Determinar el color según el estado del LED
+    if (ledStates[i]) {
+      fill(255, 0, 0);  // Rojo si está encendido
+    } else {
+      fill(0, 255, 0);  // Verde si está apagado
+    }
+
+    ellipse(x, y, 50, 50);
+  }
+}
+
+void mousePressed() {
+  int xOffset = 100;
+  int yOffsetTop = 100; // Offset para los círculos de arriba
+  int yOffsetBottom = 300; // Offset para los círculos de abajo
+
+  // Verificar si se hizo clic en algún círculo
+  for (int i = 0; i < 11; i++) {
+    int x = xOffset + i * 80; // Espaciar los círculos
+    int y;
+    if (i % 2 == 0) {
+      y = yOffsetTop; // Posicionar los círculos pares arriba
+    } else {
+      y = yOffsetBottom; // Posicionar los círculos impares abajo
+    }
+
+    if (dist(mouseX, mouseY, x, y) < 25) {
+      ledStates[i] = !ledStates[i]; // Cambiar el estado del LED
+      if (ledStates[i]) {
+        myPort.write((char)('A' + i));  // Encender LED correspondiente
+      } else {
+        myPort.write((char)('a' + i));  // Apagar LED correspondiente
+      }
+    }
+  }
+}
